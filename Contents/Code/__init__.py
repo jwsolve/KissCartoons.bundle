@@ -11,6 +11,7 @@ ICON = "icon-default.png"
 ICON_SERIES = "icon-tv.png"
 ICON_NEXT = "icon-next.png"
 BASE_URL = "http://kisscartoon.me"
+SEARCH_URL = "http://kisscartoon.me/Search/Cartoon"
 
 ######################################################################################
 # Set global variables
@@ -49,6 +50,7 @@ def MainMenu():
 def Shows():
 
 	oc = ObjectContainer()
+	oc.add(InputDirectoryObject(key = Callback(Search), title='Search', summary='Search Kisscartoon', prompt='Search for...'))
 	html = HTML.ElementFromURL(BASE_URL + '/CartoonList')
 
 	for each in html.xpath("//div[@class='alphabet']/a"):
@@ -124,3 +126,24 @@ def EpisodeDetail(title, url):
 	)	
 	
 	return oc	
+
+####################################################################################################
+@route(PREFIX + "/search")
+def Search(query):
+
+	oc = ObjectContainer(title2='Search Results')
+	data = HTTP.Request(SEARCH_URL + '?keyword=%s' % String.Quote(query, usePlus=True), headers="").content
+
+	html = HTML.ElementFromString(data)
+
+	for each in html.xpath("//tr[@class='odd']"):
+		title = each.xpath("./td/a/text()")[0]
+		url = each.xpath("./td/a/@href")[0]
+		oc.add(DirectoryObject(
+			key = Callback(ShowEpisodes, title = title, url = url),
+				title = title,
+				thumb = ICON_SERIES
+				)
+		)
+
+	return oc
