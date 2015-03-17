@@ -8,7 +8,7 @@ def MetadataObjectForURL(url):
 
 	page = HTML.ElementFromURL(url)
 
-	title = page.xpath("//div[@id='divFileName']/text()")[0]
+	title = page.xpath("//option[@selected='selected']/text()")[0]
 	description = page.xpath("//meta[@name='description']/@content")[0]
 	thumb = page.xpath("//meta[@property='og:image']/@content")[0]
 

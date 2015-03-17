@@ -95,7 +95,7 @@ def ShowEpisodes(title, url):
 
 	oc = ObjectContainer(title1 = title)
 	html = HTML.ElementFromURL(BASE_URL + url)
-	thumb = html.xpath("//div[@class='barContent']/div[1]/img/@src")
+	thumb = html.xpath("//div[@class='barContent']/div[2]/img/@src")[0]
 	for each in html.xpath("//table[@class='listing']/tr/td[1]"):
 		title = each.xpath("./a/text()")[0]
 		url = each.xpath("./a/@href")[0]
@@ -113,9 +113,9 @@ def EpisodeDetail(title, url):
 	
 	oc = ObjectContainer(title1 = title)
 	page = HTML.ElementFromURL(BASE_URL + url)
-	title = page.xpath("//div[@id='divFileName']/text()")[0]
-	description = ""
-	thumb = url
+	description = title
+	title = page.xpath("//option[@selected='selected']/text()")[0]
+	thumb = page.xpath("//meta[@property='og:image']/@content")[0]
 	
 	oc.add(VideoClipObject(
 		title = title,
