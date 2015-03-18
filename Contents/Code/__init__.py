@@ -72,9 +72,9 @@ def ShowCartoons(title, url, page_count):
 	thisletter = url.split("=",1)[1]
 	html = HTML.ElementFromURL(BASE_URL + '/CartoonList' + url + '&page=' + page_count)
 
-	for each in html.xpath("//tr[@class='odd']"):
-		title = each.xpath("./td/a/text()")[0]
-		url = each.xpath("./td/a/@href")[0]
+	for each in html.xpath("//tr/td[1]"):
+		title = each.xpath("./a/text()")[0]
+		url = each.xpath("./a/@href")[0]
 		oc.add(DirectoryObject(
 			key = Callback(ShowEpisodes, title = title, url = url),
 				title = title,
@@ -136,14 +136,13 @@ def Search(query):
 
 	html = HTML.ElementFromString(data)
 
-	for each in html.xpath("//tr[@class='odd']"):
-		title = each.xpath("./td/a/text()")[0]
-		url = each.xpath("./td/a/@href")[0]
+	for each in html.xpath("//tr/td[1]"):
+		title = each.xpath("./a/text()")[0]
+		url = each.xpath("./a/@href")[0]
 		oc.add(DirectoryObject(
 			key = Callback(ShowEpisodes, title = title, url = url),
 				title = title,
 				thumb = ICON_SERIES
 				)
 		)
-
 	return oc
