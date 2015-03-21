@@ -73,12 +73,14 @@ def ShowCartoons(title, url, page_count):
 	html = HTML.ElementFromURL(BASE_URL + '/CartoonList' + url + '&page=' + page_count)
 
 	for each in html.xpath("//tr/td[1]"):
-		title = each.xpath("./a/text()")[0]
 		url = each.xpath("./a/@href")[0]
+		thumbhtml = HTML.ElementFromURL(BASE_URL + url)
+		thumb = thumbhtml.xpath("//div[@class='barContent']/div/img/@src")[0]
+		title = thumbhtml.xpath("//a[@class='bigChar']/text()")[0]
 		oc.add(DirectoryObject(
 			key = Callback(ShowEpisodes, title = title, url = url),
 				title = title,
-				thumb = ICON_SERIES
+				thumb = thumb
 				)
 		)
 	oc.add(NextPageObject(
@@ -95,10 +97,15 @@ def ShowEpisodes(title, url):
 
 	oc = ObjectContainer(title1 = title)
 	html = HTML.ElementFromURL(BASE_URL + url)
-	thumb = html.xpath("//div[@class='barContent']/div[2]/img/@src")[0]
+	try:
+		thumb = html.xpath("//div[@class='barContent']/div[2]/img/@src")[0]
+	except:
+		thumb = url
 	for each in html.xpath("//table[@class='listing']/tr/td[1]"):
-		title = each.xpath("./a/text()")[0]
 		url = each.xpath("./a/@href")[0]
+		thumbhtml = HTML.ElementFromURL(BASE_URL + url)
+		title = thumbhtml.xpath("//option[@selected='selected']/text()")[0]
+		thumb = thumbhtml.xpath("//meta[@property='og:image']/@content")[0]
 		oc.add(DirectoryObject(
 			key = Callback(EpisodeDetail, title = title, url = url),
 				title = title,
@@ -113,8 +120,8 @@ def EpisodeDetail(title, url):
 	
 	oc = ObjectContainer(title1 = title)
 	page = HTML.ElementFromURL(BASE_URL + url)
-	description = title
 	title = page.xpath("//option[@selected='selected']/text()")[0]
+	description = page.xpath("//meta[@name='description']/@content")[0]
 	thumb = page.xpath("//meta[@property='og:image']/@content")[0]
 	
 	oc.add(VideoClipObject(
@@ -137,12 +144,17 @@ def Search(query):
 	html = HTML.ElementFromString(data)
 
 	for each in html.xpath("//tr/td[1]"):
-		title = each.xpath("./a/text()")[0]
 		url = each.xpath("./a/@href")[0]
+		thumbhtml = HTML.ElementFromURL(BASE_URL + url)
+		title = thumbhtml.xpath("//a[@class='bigChar']/text()")[0]
+		try:
+			thumb = thumbhtml.xpath("//div[@class='barContent']/div/img/@src")[0]
+		except:
+			thumb = ICON_SERIES
 		oc.add(DirectoryObject(
 			key = Callback(ShowEpisodes, title = title, url = url),
 				title = title,
-				thumb = ICON_SERIES
+				thumb = thumb
 				)
 		)
 	return oc
