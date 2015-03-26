@@ -25,15 +25,9 @@ def Start():
 	VideoClipObject.thumb = R(ICON_SERIES)
 	VideoClipObject.art = R(ART)
 
-	HTTP.Headers['Accept'] = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-	HTTP.Headers['Accept-Encoding'] = "gzip, deflate"
-	HTTP.Headers['Accept-Language'] = "en-US,en;q=0.5"
-	HTTP.Headers['Cache-Control'] = "max-age=0"
-	HTTP.Headers['Connection'] = "keep-alive"
-	HTTP.Headers['Cookie'] = "__cfduid=d345202ed3eb4cc8194e92f763bba86511426283176"
-	HTTP.Headers['DNT'] = "1"
+	HTTP.CacheTime = CACHE_1HOUR
+	HTTP.Headers['User-Agent'] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36"
 	HTTP.Headers['Host'] = "kisscartoon.me"
-	HTTP.Headers['User-Agent'] = "Mozilla/5.0 (Windows NT 6.1; rv:35.0.1) Gecko/20100101 Firefox/35.0.1 anonymized by Abelssoft 1584666243"
 	
 ######################################################################################
 # Menu hierarchy
