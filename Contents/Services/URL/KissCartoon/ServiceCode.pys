@@ -1,3 +1,5 @@
+import base64
+
 ########################################################################################
 def NormalizeURL(url):
 
@@ -52,4 +54,4 @@ def PlayVideo(url, fmt):
 	html = HTML.ElementFromURL(url)
 	video_url = html.xpath("//select[@id='selectQuality']/option[1]/@value")[0]
 
-	return IndirectResponse(VideoClipObject, key=video_url)
+	return IndirectResponse(VideoClipObject, key=base64.b64decode(video_url))
