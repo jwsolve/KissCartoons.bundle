@@ -64,13 +64,12 @@ def ShowCartoons(title, url, page_count):
 	oc = ObjectContainer(title1 = title)
 	thisurl = url
 	thisletter = url.split("=",1)[1]
-	html = HTML.ElementFromURL(BASE_URL + '/CartoonList' + url + '&page=' + page_count)
+	html = HTML.ElementFromURL(BASE_URL + '/CartoonList' + url + '&page=' + page_count, cacheTime=CACHE_1HOUR)
 
 	for each in html.xpath("//tr/td[1]"):
 		url = each.xpath("./a/@href")[0]
-		thumbhtml = HTML.ElementFromURL(BASE_URL + url)
-		thumb = thumbhtml.xpath("//div[@class='barContent']/div/img/@src")[0]
-		title = thumbhtml.xpath("//a[@class='bigChar']/text()")[0]
+		thumb = ""
+		title = each.xpath("./a/text()")[0]
 		oc.add(DirectoryObject(
 			key = Callback(ShowEpisodes, title = title, url = url),
 				title = title,
@@ -90,16 +89,15 @@ def ShowCartoons(title, url, page_count):
 def ShowEpisodes(title, url):
 
 	oc = ObjectContainer(title1 = title)
-	html = HTML.ElementFromURL(BASE_URL + url)
+	html = HTML.ElementFromURL(BASE_URL + url, cacheTime=CACHE_1HOUR)
 	try:
 		thumb = html.xpath("//div[@class='barContent']/div[2]/img/@src")[0]
 	except:
 		thumb = url
 	for each in html.xpath("//table[@class='listing']/tr/td[1]"):
 		url = each.xpath("./a/@href")[0]
-		thumbhtml = HTML.ElementFromURL(BASE_URL + url)
-		title = thumbhtml.xpath("//option[@selected='selected']/text()")[0]
-		thumb = thumbhtml.xpath("//meta[@property='og:image']/@content")[0]
+		title = each.xpath("./a/text()")[0]
+		thumb = ""
 		oc.add(DirectoryObject(
 			key = Callback(EpisodeDetail, title = title, url = url),
 				title = title,
@@ -113,7 +111,7 @@ def ShowEpisodes(title, url):
 def EpisodeDetail(title, url):
 	
 	oc = ObjectContainer(title1 = title)
-	page = HTML.ElementFromURL(BASE_URL + url)
+	page = HTML.ElementFromURL(BASE_URL + url, cacheTime=CACHE_1HOUR)
 	title = page.xpath("//option[@selected='selected']/text()")[0]
 	description = page.xpath("//meta[@name='description']/@content")[0]
 	thumb = page.xpath("//meta[@property='og:image']/@content")[0]
@@ -139,7 +137,7 @@ def Search(query):
 
 	for each in html.xpath("//tr/td[1]"):
 		url = each.xpath("./a/@href")[0]
-		thumbhtml = HTML.ElementFromURL(BASE_URL + url)
+		thumbhtml = HTML.ElementFromURL(BASE_URL + url, cacheTime=CACHE_1HOUR)
 		title = thumbhtml.xpath("//a[@class='bigChar']/text()")[0]
 		try:
 			thumb = thumbhtml.xpath("//div[@class='barContent']/div/img/@src")[0]
