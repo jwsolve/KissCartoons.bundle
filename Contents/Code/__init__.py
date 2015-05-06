@@ -50,12 +50,13 @@ def Shows():
 	for each in html.xpath("//div[@class='alphabet']/a"):
 		title = each.xpath("./text()")[0]
 		url = each.xpath("./@href")[0]
-		oc.add(DirectoryObject(
-			key = Callback(ShowCartoons, title = title, url = url, page_count = 1),
-				title = title,
-				thumb = ICON_SERIES
-				)
-		)
+		if title != "All":
+			oc.add(DirectoryObject(
+				key = Callback(ShowCartoons, title = title, url = url, page_count = 1),
+					title = title,
+					thumb = R(ICON_SERIES)
+					)
+			)
 	return oc
 ######################################################################################
 @route(PREFIX + "/showcartoons")	
@@ -67,9 +68,10 @@ def ShowCartoons(title, url, page_count):
 	html = HTML.ElementFromURL(BASE_URL + '/CartoonList' + url + '&page=' + page_count, cacheTime=CACHE_1HOUR)
 
 	for each in html.xpath("//tr/td[1]"):
-		url = each.xpath("./a/@href")[0]
-		thumb = ""
-		title = each.xpath("./a/text()")[0]
+		content = HTML.ElementFromString(each.xpath("./@title")[0])
+		url = content.xpath("./div/a[@class='bigChar']/@href")[0]
+		title = content.xpath("./div/a[@class='bigChar']/text()")[0]
+		thumb = content.xpath("./img/@src")[0]
 		oc.add(DirectoryObject(
 			key = Callback(ShowEpisodes, title = title, url = url),
 				title = title,
@@ -93,11 +95,11 @@ def ShowEpisodes(title, url):
 	try:
 		thumb = html.xpath("//div[@class='barContent']/div[2]/img/@src")[0]
 	except:
-		thumb = url
+		thumb = R(ICON_SERIES)
+	showtitle=title
 	for each in html.xpath("//table[@class='listing']/tr/td[1]"):
 		url = each.xpath("./a/@href")[0]
-		title = each.xpath("./a/text()")[0]
-		thumb = ""
+		title = each.xpath("./a/text()")[0].strip().replace(showtitle + ' ','')
 		oc.add(DirectoryObject(
 			key = Callback(EpisodeDetail, title = title, url = url),
 				title = title,
@@ -112,7 +114,7 @@ def EpisodeDetail(title, url):
 	
 	oc = ObjectContainer(title1 = title)
 	page = HTML.ElementFromURL(BASE_URL + url, cacheTime=CACHE_1HOUR)
-	title = page.xpath("//option[@selected='selected']/text()")[0]
+	title = page.xpath("//option[@selected='selected']/text()")[0].strip()
 	description = page.xpath("//meta[@name='description']/@content")[0]
 	thumb = page.xpath("//meta[@property='og:image']/@content")[0]
 	
