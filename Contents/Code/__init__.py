@@ -144,7 +144,7 @@ def Search(query):
 		try:
 			thumb = thumbhtml.xpath("//div[@class='barContent']/div/img/@src")[0]
 		except:
-			thumb = ICON_SERIES
+			thumb = R(ICON_SERIES)
 		oc.add(DirectoryObject(
 			key = Callback(ShowEpisodes, title = title, url = url),
 				title = title,
