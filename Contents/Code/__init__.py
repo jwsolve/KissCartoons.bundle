@@ -63,7 +63,7 @@ def Shows():
 	page_data = html.fromstring(page.text)
 
 	for each in page_data.xpath("//div[@class='alphabet']/a"):
-		title = each.xpath("./text()")[0]
+		title = each.xpath("./text()")[0].strip()
 		url = each.xpath("./@href")[0]
 		if title != "All":
 			oc.add(DirectoryObject(
@@ -86,7 +86,7 @@ def ShowCartoons(title, url, page_count):
 	for each in page_data.xpath("//tr/td[1]"):
 		content = HTML.ElementFromString(each.xpath("./@title")[0])
 		url = content.xpath("./div/a[@class='bigChar']/@href")[0]
-		title = content.xpath("./div/a[@class='bigChar']/text()")[0]
+		title = content.xpath("./div/a[@class='bigChar']/text()")[0].strip()
 		thumb = content.xpath("./img/@src")[0]
 		oc.add(DirectoryObject(
 			key = Callback(ShowEpisodes, title = title, url = url),
@@ -158,7 +158,7 @@ def Search(query):
 		url = each.xpath("./a/@href")[0]
 		page = scraper.get(BASE_URL + url)
 		thumbhtml = html.fromstring(page.text)
-		title = thumbhtml.xpath("//a[@class='bigChar']/text()")[0]
+		title = thumbhtml.xpath("//a[@class='bigChar']/text()")[0].strip()
 		try:
 			thumb = thumbhtml.xpath("//div[@class='barContent']/div/img/@src")[0]
 		except:
