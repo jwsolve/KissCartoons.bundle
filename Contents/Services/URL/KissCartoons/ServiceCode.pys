@@ -25,7 +25,10 @@ def MetadataObjectForURL(url):
 	pagehtml = scraper.get(url)
 	page = html.fromstring(pagehtml.text)
 
-	title = page.xpath("//option[@selected='selected']/text()")[0]
+	try:
+		title = page.xpath("//option[@selected='selected']/text()")[0]
+	except:
+		title = page.xpath("//option/text()")[0]
 	description = page.xpath("//meta[@name='description']/@content")[0]
 	thumb = page.xpath("//meta[@property='og:image']/@content")[0]
 
