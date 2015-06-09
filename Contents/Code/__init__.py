@@ -13,6 +13,20 @@ ICON_NEXT = "icon-next.png"
 BASE_URL = "http://kisscartoon.me"
 SEARCH_URL = "http://kisscartoon.me/Search/Cartoon"
 
+import os
+import sys
+from lxml import html
+
+try:
+	path = os.getcwd().split("?\\")[1].split('Plug-in Support')[0]+"Plug-ins/KissCartoons.bundle/Contents/Code/Modules/KissCartoons"
+except:
+	path = os.getcwd().split("Plug-in Support")[0]+"Plug-ins/KissCartoons.bundle/Contents/Code/Modules/KissCartoons"
+if path not in sys.path:
+	sys.path.append(path)
+
+import cfscrape
+scraper = cfscrape.create_scraper()
+
 ######################################################################################
 # Set global variables
 
@@ -45,9 +59,10 @@ def Shows():
 
 	oc = ObjectContainer()
 	oc.add(InputDirectoryObject(key = Callback(Search), title='Search', summary='Search Kisscartoon', prompt='Search for...'))
-	html = HTML.ElementFromURL(BASE_URL + '/CartoonList')
+	page = scraper.get(BASE_URL + '/CartoonList')
+	page_data = html.fromstring(page.text)
 
-	for each in html.xpath("//div[@class='alphabet']/a"):
+	for each in page_data.xpath("//div[@class='alphabet']/a"):
 		title = each.xpath("./text()")[0]
 		url = each.xpath("./@href")[0]
 		if title != "All":
@@ -65,9 +80,10 @@ def ShowCartoons(title, url, page_count):
 	oc = ObjectContainer(title1 = title)
 	thisurl = url
 	thisletter = url.split("=",1)[1]
-	html = HTML.ElementFromURL(BASE_URL + '/CartoonList' + url + '&page=' + page_count, cacheTime=CACHE_1HOUR)
+	page = scraper.get(BASE_URL + '/CartoonList' + url + '&page=' + page_count)
+	page_data = html.fromstring(page.text)
 
-	for each in html.xpath("//tr/td[1]"):
+	for each in page_data.xpath("//tr/td[1]"):
 		content = HTML.ElementFromString(each.xpath("./@title")[0])
 		url = content.xpath("./div/a[@class='bigChar']/@href")[0]
 		title = content.xpath("./div/a[@class='bigChar']/text()")[0]
@@ -91,13 +107,14 @@ def ShowCartoons(title, url, page_count):
 def ShowEpisodes(title, url):
 
 	oc = ObjectContainer(title1 = title)
-	html = HTML.ElementFromURL(BASE_URL + url, cacheTime=CACHE_1HOUR)
+	page = scraper.get(BASE_URL + url)
+	page_data = html.fromstring(page.text)
 	try:
-		thumb = html.xpath("//div[@class='barContent']/div[2]/img/@src")[0]
+		thumb = page_data.xpath("//div[@class='barContent']/div[2]/img/@src")[0]
 	except:
 		thumb = R(ICON_SERIES)
 	showtitle=title
-	for each in html.xpath("//table[@class='listing']/tr/td[1]"):
+	for each in page_data.xpath("//table[@class='listing']/tr/td[1]"):
 		url = each.xpath("./a/@href")[0]
 		title = each.xpath("./a/text()")[0].strip().replace(showtitle + ' ','')
 		oc.add(DirectoryObject(
@@ -113,10 +130,11 @@ def ShowEpisodes(title, url):
 def EpisodeDetail(title, url):
 	
 	oc = ObjectContainer(title1 = title)
-	page = HTML.ElementFromURL(BASE_URL + url, cacheTime=CACHE_1HOUR)
-	title = page.xpath("//option[@selected='selected']/text()")[0].strip()
-	description = page.xpath("//meta[@name='description']/@content")[0]
-	thumb = page.xpath("//meta[@property='og:image']/@content")[0]
+	page = scraper.get(BASE_URL + url)
+	page_data = html.fromstring(page.text)
+	title = page_data.xpath("//option[@selected='selected']/text()")[0].strip()
+	description = page_data.xpath("//meta[@name='description']/@content")[0]
+	thumb = page_data.xpath("//meta[@property='og:image']/@content")[0]
 	
 	oc.add(VideoClipObject(
 		title = title,
@@ -133,18 +151,18 @@ def EpisodeDetail(title, url):
 def Search(query):
 
 	oc = ObjectContainer(title2='Search Results')
-	data = HTTP.Request(SEARCH_URL + '?keyword=%s' % String.Quote(query, usePlus=True), headers="").content
+	searchdata = scraper.get(SEARCH_URL + '?keyword=%s' % String.Quote(query, usePlus=True))
+	pagehtml = html.fromstring(searchdata.text)
 
-	html = HTML.ElementFromString(data)
-
-	for each in html.xpath("//tr/td[1]"):
+	for each in pagehtml.xpath("//tr/td[1]"):
 		url = each.xpath("./a/@href")[0]
-		thumbhtml = HTML.ElementFromURL(BASE_URL + url, cacheTime=CACHE_1HOUR)
+		page = scraper.get(BASE_URL + url)
+		thumbhtml = html.fromstring(page.text)
 		title = thumbhtml.xpath("//a[@class='bigChar']/text()")[0]
 		try:
 			thumb = thumbhtml.xpath("//div[@class='barContent']/div/img/@src")[0]
 		except:
-			thumb = R(ICON_SERIES)
+			thumb = ICON_SERIES
 		oc.add(DirectoryObject(
 			key = Callback(ShowEpisodes, title = title, url = url),
 				title = title,
