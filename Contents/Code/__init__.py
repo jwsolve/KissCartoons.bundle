@@ -16,6 +16,8 @@ SEARCH_URL = "http://kisscartoon.me/Search/Cartoon"
 import os
 import sys
 from lxml import html
+import updater
+updater.init(repo = '/jwsolve/KissCartoons.bundle', branch = 'master')
 
 try:
 	path = os.getcwd().split("?\\")[1].split('Plug-in Support')[0]+"Plug-ins/KissCartoons.bundle/Contents/Code/Modules/KissCartoons"
@@ -58,6 +60,7 @@ def MainMenu():
 def Shows():
 
 	oc = ObjectContainer()
+	updater.add_button_to(oc, PerformUpdate)
 	oc.add(InputDirectoryObject(key = Callback(Search), title='Search', summary='Search Kisscartoon', prompt='Search for...'))
 	page = scraper.get(BASE_URL + '/CartoonList')
 	page_data = html.fromstring(page.text)
@@ -103,6 +106,11 @@ def ShowCartoons(title, url, page_count):
 	return oc
 
 ######################################################################################
+@route(PREFIX + "/performupdate")
+def PerformUpdate():
+	return updater.PerformUpdate()
+
+######################################################################################
 @route(PREFIX + "/showepisodes")	
 def ShowEpisodes(title, url):
 
@@ -132,7 +140,7 @@ def EpisodeDetail(title, url):
 	oc = ObjectContainer(title1 = title)
 	page = scraper.get(BASE_URL + url)
 	page_data = html.fromstring(page.text)
-	title = page_data.xpath("//option[@selected='selected']/text()")[0].strip()
+	title = page_data.xpath("//meta[@name='keywords']/@content")[0].split(' - ')[0].strip()
 	description = page_data.xpath("//meta[@name='description']/@content")[0]
 	thumb = page_data.xpath("//meta[@property='og:image']/@content")[0]
 	

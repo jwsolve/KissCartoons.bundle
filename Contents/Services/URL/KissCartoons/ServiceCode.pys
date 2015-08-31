@@ -26,7 +26,7 @@ def MetadataObjectForURL(url):
 	page = html.fromstring(pagehtml.text)
 
 	try:
-		title = page.xpath("//option[@selected='selected']/text()")[0]
+		title = page.xpath("//option[@selected='']/text()")[0]
 	except:
 		title = page.xpath("//option/text()")[0]
 	description = page.xpath("//meta[@name='description']/@content")[0]
