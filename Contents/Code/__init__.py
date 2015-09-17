@@ -41,9 +41,9 @@ def Start():
 	VideoClipObject.thumb = R(ICON_SERIES)
 	VideoClipObject.art = R(ART)
 
-	HTTP.CacheTime = CACHE_1HOUR
 	HTTP.Headers['User-Agent'] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36"
 	HTTP.Headers['Host'] = "kisscartoon.me"
+	HTTP.Headers['Referer'] = "kisscartoon.me"
 	
 ######################################################################################
 # Menu hierarchy
@@ -59,9 +59,9 @@ def MainMenu():
 @route(PREFIX + "/shows")	
 def Shows():
 
-	oc = ObjectContainer()
-	updater.add_button_to(oc, PerformUpdate)
-	oc.add(InputDirectoryObject(key = Callback(Search), title='Search', summary='Search Kisscartoon', prompt='Search for...'))
+	container = ObjectContainer()
+	updater.add_button_to(container, PerformUpdate)
+	container.add(InputDirectoryObject(key = Callback(Search), title='Search', summary='Search Kisscartoon', prompt='Search for...'))
 	page = scraper.get(BASE_URL + '/CartoonList')
 	page_data = html.fromstring(page.text)
 
@@ -69,13 +69,13 @@ def Shows():
 		title = each.xpath("./text()")[0].strip()
 		url = each.xpath("./@href")[0]
 		if title != "All":
-			oc.add(DirectoryObject(
+			container.add(DirectoryObject(
 				key = Callback(ShowCartoons, title = title, url = url, page_count = 1),
 					title = title,
 					thumb = R(ICON_SERIES)
 					)
 			)
-	return oc
+	return container
 ######################################################################################
 @route(PREFIX + "/showcartoons")	
 def ShowCartoons(title, url, page_count):
@@ -90,7 +90,12 @@ def ShowCartoons(title, url, page_count):
 		content = HTML.ElementFromString(each.xpath("./@title")[0])
 		url = content.xpath("./div/a[@class='bigChar']/@href")[0]
 		title = content.xpath("./div/a[@class='bigChar']/text()")[0].strip()
-		thumb = content.xpath("./img/@src")[0]
+
+		thumbhtml = scraper.get(BASE_URL + url)
+		page_html = html.fromstring(thumbhtml.text)
+		thumb = page_html.xpath("//link[@rel='image_src']/@href")[0]
+		Log(thumb)
+
 		oc.add(DirectoryObject(
 			key = Callback(ShowEpisodes, title = title, url = url),
 				title = title,
@@ -117,10 +122,7 @@ def ShowEpisodes(title, url):
 	oc = ObjectContainer(title1 = title)
 	page = scraper.get(BASE_URL + url)
 	page_data = html.fromstring(page.text)
-	try:
-		thumb = page_data.xpath("//div[@class='barContent']/div[2]/img/@src")[0]
-	except:
-		thumb = R(ICON_SERIES)
+	thumb = page_data.xpath("//link[@rel='image_src']/@href")[0]
 	showtitle=title
 	for each in page_data.xpath("//table[@class='listing']/tr/td[1]"):
 		url = each.xpath("./a/@href")[0]
@@ -167,10 +169,7 @@ def Search(query):
 		page = scraper.get(BASE_URL + url)
 		thumbhtml = html.fromstring(page.text)
 		title = thumbhtml.xpath("//a[@class='bigChar']/text()")[0].strip()
-		try:
-			thumb = thumbhtml.xpath("//div[@class='barContent']/div/img/@src")[0]
-		except:
-			thumb = ICON_SERIES
+		thumb = thumbhtml.xpath("//link[@rel='image_src']/@href")[0]
 		oc.add(DirectoryObject(
 			key = Callback(ShowEpisodes, title = title, url = url),
 				title = title,
